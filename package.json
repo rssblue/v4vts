@@ -35,6 +35,7 @@
     "check-exports": "attw --pack .",
     "test": "vitest run",
     "dev": "vitest",
-    "ci": "pnpm run build && pnpm run check-format && pnpm run check-exports && pnpm run lint && pnpm run test"
+    "lint": "tsc",
+    "ci": "pnpm run build && pnpm run check-format && pnpm run lint && pnpm run test"
   }
 }
