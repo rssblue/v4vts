@@ -1,0 +1,40 @@
+{
+  "main": "dist/index.js",
+  "name": "v4vts",
+  "version": "0.1.0",
+  "description": "V4V calculations and transactions for Podcasting 2.0",
+  "keywords": [
+    "rss",
+    "podcasting20",
+    "v4v"
+  ],
+  "homepage": "https://github.com/rssblue/v4vts",
+  "bugs": {
+    "url": "https://github.com/rssblue/v4vts/issues"
+  },
+  "author": "Dovydas Joksas (https://rssblue.com)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rssblue/v4vts.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "license": "MIT",
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.15.4",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  },
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write .",
+    "check-format": "prettier --check .",
+    "check-exports": "attw --pack .",
+    "test": "vitest run",
+    "dev": "vitest",
+    "ci": "pnpm run build && pnpm run check-format && pnpm run check-exports && pnpm run lint && pnpm run test"
+  }
+}
