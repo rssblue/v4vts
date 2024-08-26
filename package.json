@@ -24,6 +24,7 @@
   "license": "MIT",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.15.4",
+    "@changesets/cli": "^2.27.7",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "vitest": "^2.0.5"
@@ -36,6 +37,8 @@
     "test": "vitest run",
     "dev": "vitest",
     "lint": "tsc",
-    "ci": "pnpm run build && pnpm run check-format && pnpm run lint && pnpm run test"
+    "local-release": "changeset version && changeset publish",
+    "ci": "pnpm run build && pnpm run check-format && pnpm run lint && pnpm run test",
+    "prepublishOnly": "pnpm run ci"
   }
 }
