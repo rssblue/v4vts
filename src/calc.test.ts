@@ -1,7 +1,7 @@
 import { computeSatRecipients } from "./calc.js";
 import { test, expect, describe } from "vitest";
 
-describe('computeSatRecipients', () => {
+describe("computeSatRecipients", () => {
   test("case-1", () => {
     const splits = [100];
     const totalSats = 100;
@@ -53,49 +53,74 @@ describe('computeSatRecipients', () => {
   test("case-9", () => {
     const splits = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     const totalSats = 10;
-    expect(computeSatRecipients(splits, totalSats)).toEqual([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    ]);
   });
 
   test("case-10", () => {
     const splits = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     const totalSats = 9;
-    expect(computeSatRecipients(splits, totalSats)).toEqual([1, 1, 1, 1, 1, 1, 1, 1, 1, 0]);
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    ]);
   });
 
   test("case-11", () => {
     const splits = [2, 2, 2, 2, 1, 2, 2, 2, 2, 2];
     const totalSats = 9;
-    expect(computeSatRecipients(splits, totalSats)).toEqual([1, 1, 1, 1, 0, 1, 1, 1, 1, 1]);
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
+    ]);
   });
 
   test("case-12", () => {
-    const splits = [1000000, 1000000, 1000000, 1000000, 1, 1000000, 1000000, 1000000, 1000000, 1000000];
+    const splits = [
+      1000000, 1000000, 1000000, 1000000, 1, 1000000, 1000000, 1000000, 1000000,
+      1000000,
+    ];
     const totalSats = 9;
-    expect(computeSatRecipients(splits, totalSats)).toEqual([1, 1, 1, 1, 0, 1, 1, 1, 1, 1]);
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
+    ]);
   });
 
   test("case-13", () => {
-    const splits = [1000000, 1000000, 1000000, 1000000, 0, 1000000, 1000000, 1000000, 1000000, 1000000];
+    const splits = [
+      1000000, 1000000, 1000000, 1000000, 0, 1000000, 1000000, 1000000, 1000000,
+      1000000,
+    ];
     const totalSats = 9;
-    expect(computeSatRecipients(splits, totalSats)).toEqual([1, 1, 1, 1, 0, 1, 1, 1, 1, 1]);
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      1, 1, 1, 1, 0, 1, 1, 1, 1, 1,
+    ]);
   });
 
   test("case-14", () => {
-    const splits = [1000000, 1000000, 1000000, 1000000, 0, 1000000, 1000000, 1000000, 1000000, 1000000];
+    const splits = [
+      1000000, 1000000, 1000000, 1000000, 0, 1000000, 1000000, 1000000, 1000000,
+      1000000,
+    ];
     const totalSats = 11;
-    expect(computeSatRecipients(splits, totalSats)).toEqual([2, 1, 1, 1, 1, 1, 1, 1, 1, 1]);
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      2, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    ]);
   });
 
   test("case-15", () => {
     const splits = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     const totalSats = 55;
-    expect(computeSatRecipients(splits, totalSats)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    ]);
   });
 
   test("case-16", () => {
     const splits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     const totalSats = 56;
-    expect(computeSatRecipients(splits, totalSats)).toEqual([1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    ]);
   });
 
   test("case-17", () => {
