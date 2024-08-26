@@ -40,5 +40,9 @@
     "local-release": "changeset version && changeset publish",
     "ci": "pnpm run build && pnpm run check-format && pnpm run lint && pnpm run test",
     "prepublishOnly": "pnpm run ci"
+  },
+  "dependencies": {
+    "uuid": "^10.0.0",
+    "yup": "^1.4.0"
   }
 }
