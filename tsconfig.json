@@ -1,4 +1,6 @@
 {
+  "include": ["src/**/*.ts"],
+  "exclude": ["./vite.config.ts"],
   "compilerOptions": {
     /* Base Options: */
     "esModuleInterop": true,
