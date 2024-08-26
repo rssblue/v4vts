@@ -1,4 +1,4 @@
-import { extractLiveUpdateBlock, type LiveUpdateBlock } from "./sockets.js";
+import { extractLiveUpdateBlock, LiveUpdateBlock } from "v4vts/sockets";
 import { test, expect, describe } from "vitest";
 
 describe("extractLiveUpdateBlock", () => {

@@ -1,4 +1,5 @@
-import { computeSatRecipients } from "./calc.js";
+import { computeSatRecipients } from "v4vts/calc";
+
 import { test, expect, describe } from "vitest";
 
 describe("computeSatRecipients", () => {
