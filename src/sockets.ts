@@ -17,17 +17,27 @@ const ValueDestinationFieldSchema = yup.object({
 });
 export type ValueDestination = yup.InferType<typeof ValueDestinationSchema>;
 
+const UrlObjectSchema = yup.object({
+  url: yup.string().url().required(),
+  text: yup.string().nullable().default(null),
+})
+
+const OptionalUuidSchema = yup.string().transform((value) => {
+  return uuidValidate(value) ? value : null;
+}).nullable().default(null);
+
 const LiveUpdateBlockSchema = yup.object({
   title: yup.string().required(),
+  link: UrlObjectSchema.transform((value) => {
+    if (UrlObjectSchema.isValidSync(value)) {
+      return UrlObjectSchema.cast(value, { stripUnknown: true });
+    }
+
+    return undefined;
+  }).nullable().default(null),
   image: yup.string().nullable().default(null),
   description: yup.string().nullable().default(null),
-  feedGuid: yup
-    .string()
-    .transform((value) => {
-      return uuidValidate(value) ? value : null;
-    })
-    .nullable()
-    .default(null),
+  feedGuid: OptionalUuidSchema,
   itemGuid: yup.string().nullable().default(null),
   value: ValueDestinationFieldSchema.transform((value) => {
     if (ValueDestinationFieldSchema.isValidSync(value)) {
@@ -36,6 +46,7 @@ const LiveUpdateBlockSchema = yup.object({
 
     return undefined;
   }).default({ destinations: [] }),
+  blockGuid: OptionalUuidSchema,
 });
 export type LiveUpdateBlock = yup.InferType<typeof LiveUpdateBlockSchema>;
 

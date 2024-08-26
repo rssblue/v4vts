@@ -46,6 +46,10 @@ describe("extractLiveUpdateBlock", () => {
       title: "#2 - simple chapter with link",
       image:
         "https://media.rssblue.com/podcasts/rss-blue-podcast/cover-art.rssblue-square.png",
+      link: {
+        text: null,
+        url: "https://example.com",
+      },
       description: null,
       feedGuid: null,
       itemGuid: null,
@@ -71,6 +75,7 @@ describe("extractLiveUpdateBlock", () => {
           },
         ],
       },
+      blockGuid: "e9be919d-8f3f-4a92-88d2-4c0cb008c340",
     } as LiveUpdateBlock;
     expect(result).toEqual(expected);
   });
@@ -81,6 +86,7 @@ describe("extractLiveUpdateBlock", () => {
     const result = extractLiveUpdateBlock(data);
     const expected = {
       title: "Chapter",
+      link: null,
       image: null,
       description: null,
       feedGuid: null,
@@ -88,6 +94,7 @@ describe("extractLiveUpdateBlock", () => {
       value: {
         destinations: [],
       },
+      blockGuid: null,
     } as LiveUpdateBlock;
     expect(result).toEqual(expected);
   });
@@ -108,12 +115,14 @@ describe("extractLiveUpdateBlock", () => {
     const expected = {
       title: "Chapter",
       image: null,
+      link: null,
       description: null,
       feedGuid: "cb28401c-716a-51df-8de5-e90527546a12",
       itemGuid: null,
       value: {
         destinations: [],
       },
+      blockGuid: null,
     } as LiveUpdateBlock;
     expect(result).toEqual(expected);
   });
@@ -127,12 +136,14 @@ describe("extractLiveUpdateBlock", () => {
     const expected = {
       title: "Chapter",
       image: null,
+      link: null,
       description: null,
       feedGuid: null,
       itemGuid: null,
       value: {
         destinations: [],
       },
+      blockGuid: null,
     } as LiveUpdateBlock;
     expect(result).toEqual(expected);
   });
@@ -146,12 +157,14 @@ describe("extractLiveUpdateBlock", () => {
     const expected = {
       title: "Chapter",
       image: "123",
+      link: null,
       description: null,
       feedGuid: null,
       itemGuid: null,
       value: {
         destinations: [],
       },
+      blockGuid: null,
     } as LiveUpdateBlock;
     expect(result).toEqual(expected);
   });
