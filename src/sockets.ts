@@ -23,12 +23,16 @@ const UrlObjectSchema = z.object({
 });
 
 // Use proper UUID validation because z.string().uuid() does not validate version.
-const OptionalUuidSchema = z.string().nullable().refine((value) => {
-  if (value === null) {
-    return true;
-  }
-  return uuidValidate(value);
-}).catch(null);
+const OptionalUuidSchema = z
+  .string()
+  .nullable()
+  .refine((value) => {
+    if (value === null) {
+      return true;
+    }
+    return uuidValidate(value);
+  })
+  .catch(null);
 
 const LiveUpdateBlockSchema = z.object({
   title: z.string(),
