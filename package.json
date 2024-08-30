@@ -1,7 +1,7 @@
 {
   "main": "dist/index.js",
   "name": "v4vts",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "V4V calculations and transactions for Podcasting 2.0",
   "keywords": [
     "rss",
