@@ -156,7 +156,29 @@ describe("extractLiveUpdateBlock", () => {
     const result = extractLiveUpdateBlock(data);
     const expected = {
       title: "Chapter",
-      image: "123",
+      image: null,
+      link: null,
+      description: null,
+      feedGuid: null,
+      itemGuid: null,
+      value: {
+        destinations: [],
+      },
+      blockGuid: null,
+    } as LiveUpdateBlock;
+    expect(result).toEqual(expected);
+  });
+  test("case-7", () => {
+    const data = {
+      title: "Chapter with invalid URL.",
+      link: {
+        url: "123",
+      },
+    };
+    const result = extractLiveUpdateBlock(data);
+    const expected = {
+      title: "Chapter with invalid URL.",
+      image: null,
       link: null,
       description: null,
       feedGuid: null,

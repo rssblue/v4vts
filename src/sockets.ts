@@ -1,65 +1,51 @@
-import * as yup from "yup";
 import { validate as uuidValidate } from "uuid";
+import { z } from "zod";
 
-const ValueDestinationSchema = yup.object({
-  name: yup.string().nullable().default(null),
+const ValueDestinationSchema = z.object({
+  name: z.string().nullable().catch(null),
 
-  address: yup.string().required(),
-  customKey: yup.string().nullable().default(null),
-  customValue: yup.string().nullable().default(null),
+  address: z.string(),
+  customKey: z.string().nullable().catch(null),
+  customValue: z.string().nullable().catch(null),
 
-  split: yup.number().required(),
+  split: z.number(),
 
-  fee: yup.boolean().default(false),
+  fee: z.boolean().catch(false),
 });
-const ValueDestinationFieldSchema = yup.object({
-  destinations: yup.array().of(ValueDestinationSchema).required(),
+const ValueDestinationFieldSchema = z.object({
+  destinations: z.array(ValueDestinationSchema),
 });
-export type ValueDestination = yup.InferType<typeof ValueDestinationSchema>;
+export type ValueDestination = z.infer<typeof ValueDestinationSchema>;
 
-const UrlObjectSchema = yup.object({
-  url: yup.string().url().required(),
-  text: yup.string().nullable().default(null),
+const UrlObjectSchema = z.object({
+  url: z.string().url(),
+  text: z.string().nullable().catch(null),
 });
 
-const OptionalUuidSchema = yup
-  .string()
-  .transform((value) => {
-    return uuidValidate(value) ? value : null;
-  })
-  .nullable()
-  .default(null);
+// Use proper UUID validation because z.string().uuid() does not validate version.
+const OptionalUuidSchema = z.string().nullable().refine((value) => {
+  if (value === null) {
+    return true;
+  }
+  return uuidValidate(value);
+}).catch(null);
 
-const LiveUpdateBlockSchema = yup.object({
-  title: yup.string().required(),
-  link: UrlObjectSchema.transform((value) => {
-    if (UrlObjectSchema.isValidSync(value)) {
-      return UrlObjectSchema.cast(value, { stripUnknown: true });
-    }
-
-    return undefined;
-  })
-    .nullable()
-    .default(null),
-  image: yup.string().nullable().default(null),
-  description: yup.string().nullable().default(null),
+const LiveUpdateBlockSchema = z.object({
+  title: z.string(),
+  link: UrlObjectSchema.nullable().catch(null),
+  image: z.string().url().nullable().catch(null),
+  description: z.string().nullable().catch(null),
   feedGuid: OptionalUuidSchema,
-  itemGuid: yup.string().nullable().default(null),
-  value: ValueDestinationFieldSchema.transform((value) => {
-    if (ValueDestinationFieldSchema.isValidSync(value)) {
-      return ValueDestinationFieldSchema.cast(value, { stripUnknown: true });
-    }
-
-    return undefined;
-  }).default({ destinations: [] }),
+  itemGuid: z.string().nullable().catch(null),
+  value: ValueDestinationFieldSchema.catch({ destinations: [] }),
   blockGuid: OptionalUuidSchema,
 });
-export type LiveUpdateBlock = yup.InferType<typeof LiveUpdateBlockSchema>;
+export type LiveUpdateBlock = z.infer<typeof LiveUpdateBlockSchema>;
 
 export function extractLiveUpdateBlock(data: any): LiveUpdateBlock | null {
-  if (LiveUpdateBlockSchema.isValidSync(data)) {
-    return LiveUpdateBlockSchema.cast(data, { stripUnknown: true });
+  try {
+    return LiveUpdateBlockSchema.parse(data);
+  } catch (e) {
+    return null;
   }
-
-  return null;
 }
