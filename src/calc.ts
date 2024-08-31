@@ -146,3 +146,112 @@ export function computeSatRecipients(
 
   return satAmounts;
 }
+
+// Represents a share-based recipient.
+export type ShareBasedRecipient = {
+  numShares: number;
+};
+
+// Represents a percentage-based recipient.
+export type PercentageBasedRecipient = {
+  percentage: number;
+};
+
+export type Recipient = ShareBasedRecipient | PercentageBasedRecipient;
+
+// Type guard function to determine the type of recipient
+function isPercentageBased(
+  recipient: Recipient,
+): recipient is PercentageBasedRecipient {
+  return "percentage" in recipient;
+}
+
+// Represents an error when converting a list of share- or percentage-based recipients into a list of share-like splits.
+export enum RecipientsToSplitsError {
+  TotalFeeExceeds100 = "Total fees exceeds 100%",
+  FeeIs100ButNonFeeRecipientsExist = "Total fees equal 100%, but non-fee recipients exist",
+}
+
+// Calculates the greatest common divisor of two numbers.
+function gcd(a: bigint, b: bigint): bigint {
+  return b === 0n ? a : gcd(b, a % b);
+}
+
+/**
+ * Converts a list of generic recipients into a list of share-like splits.
+ *
+ * Share-based recipients maintain the same ratios between themselves after percentage-based
+ * recipients are included.
+ *
+ * @param recipients - An array of Recipients (either ShareBasedRecipient or PercentageBasedRecipient)
+ * @returns An array of numbers representing the splits, or a RecipientsToSplitsError if an error occurs
+ *
+ * @example
+ * ```typescript
+ * const recipients: Recipient[] = [
+ *     { numShares: 50 },
+ *     { numShares: 50 },
+ *     { percentage: 1 },
+ * ];
+ * // Share-based recipients still receive splits in the 50/50 ratio between them. But
+ * // overall, they get 49.5% each, and the percentage-based recipient gets the required 1%.
+ * // That's because 99/(99+99+2) = 49.5% and 2/(99+99+2) = 1%.
+ * const result = feeRecipientsToSplits(recipients);
+ * console.log(result); // [99, 99, 2]
+ * ```
+ */
+export function feeRecipientsToSplits(
+  recipients: Recipient[],
+): number[] | RecipientsToSplitsError {
+  const totalPercentage = recipients
+    .filter(isPercentageBased)
+    .reduce((sum, r) => sum + r.percentage, 0);
+
+  if (totalPercentage > 100) {
+    return RecipientsToSplitsError.TotalFeeExceeds100;
+  }
+
+  const shareRecipients = recipients.filter(
+    (r): r is ShareBasedRecipient => !isPercentageBased(r),
+  );
+
+  if (totalPercentage === 100 && shareRecipients.length > 0) {
+    return RecipientsToSplitsError.FeeIs100ButNonFeeRecipientsExist;
+  }
+
+  const remainingPercentage = BigInt(100 - totalPercentage);
+  const totalShares = shareRecipients.reduce(
+    (sum, r) => sum + BigInt(r.numShares),
+    0n,
+  );
+
+  let result: bigint[] = recipients.map((recipient) => {
+    if (!isPercentageBased(recipient)) {
+      return BigInt(recipient.numShares) * remainingPercentage;
+    } else {
+      return shareRecipients.length === 0
+        ? BigInt(recipient.percentage) * 100n
+        : BigInt(recipient.percentage) * totalShares;
+    }
+  });
+
+  // Find the GCD of all non-zero values to normalize the results
+  const gcdValue = result.reduce(
+    (acc, x) => (x !== 0n ? gcd(acc, x) : acc),
+    0n,
+  );
+
+  if (gcdValue > 1n) {
+    result = result.map((x) => (x === 0n ? 0n : x / gcdValue));
+  }
+
+  // Convert back to number[], scaling if necessary
+  const maxBigInt = result.reduce((max, val) => (val > max ? val : max), 0n);
+  if (maxBigInt > BigInt(Number.MAX_SAFE_INTEGER)) {
+    const scale =
+      Number((BigInt(Number.MAX_SAFE_INTEGER) * 100n) / maxBigInt) / 100;
+    return result.map((x) => Math.round(Number(x) * scale));
+  } else {
+    return result.map((x) => Number(x));
+  }
+}

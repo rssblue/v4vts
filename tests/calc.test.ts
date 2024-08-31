@@ -1,4 +1,8 @@
-import { computeSatRecipients } from "v4vts/calc";
+import {
+  computeSatRecipients,
+  feeRecipientsToSplits,
+  RecipientsToSplitsError,
+} from "v4vts/calc";
 
 import { test, expect, describe } from "vitest";
 
@@ -270,5 +274,178 @@ describe("computeSatRecipients", () => {
     const splits = [50, 50];
     const totalSats = NaN;
     expect(computeSatRecipients(splits, totalSats)).toEqual([0, 0]);
+  });
+});
+
+describe("feeRecipientsToSplits", () => {
+  test("case_1", () => {
+    const recipients: Recipient[] = [{ numShares: 50 }, { numShares: 50 }];
+    expect(feeRecipientsToSplits(recipients)).toEqual([1, 1]);
+  });
+
+  test("case_2", () => {
+    const recipients: Recipient[] = [
+      { numShares: 50 },
+      { numShares: 50 },
+      { percentage: 2 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([49, 49, 2]);
+  });
+
+  test("case_3", () => {
+    const recipients: Recipient[] = [
+      { numShares: 50 },
+      { numShares: 50 },
+      { percentage: 1 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([99, 99, 2]);
+  });
+
+  test("case_4", () => {
+    const recipients: Recipient[] = [
+      { numShares: 50 },
+      { numShares: 50 },
+      { percentage: 1 },
+      { percentage: 1 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([49, 49, 1, 1]);
+  });
+
+  test("case_5", () => {
+    const recipients: Recipient[] = [
+      { numShares: 1 },
+      { numShares: 1 },
+      { percentage: 2 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([49, 49, 2]);
+  });
+
+  test("case_6", () => {
+    const recipients: Recipient[] = [{ percentage: 100 }];
+    expect(feeRecipientsToSplits(recipients)).toEqual([1]);
+  });
+
+  test("case_7", () => {
+    const recipients: Recipient[] = [{ percentage: 2 }, { percentage: 1 }];
+    expect(feeRecipientsToSplits(recipients)).toEqual([2, 1]);
+  });
+
+  test("case_8", () => {
+    const recipients: Recipient[] = [
+      { numShares: 10 },
+      { numShares: 20 },
+      { numShares: 30 },
+      { numShares: 40 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([1, 2, 3, 4]);
+  });
+
+  test("case_9", () => {
+    const recipients: Recipient[] = [
+      { numShares: 10 },
+      { numShares: 20 },
+      { numShares: 30 },
+      { numShares: 40 },
+      { percentage: 1 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([99, 198, 297, 396, 10]);
+  });
+
+  test("case_10", () => {
+    const recipients: Recipient[] = [
+      { numShares: 10 },
+      { numShares: 20 },
+      { numShares: 30 },
+      { numShares: 40 },
+      { percentage: 1 },
+      { percentage: 1 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([49, 98, 147, 196, 5, 5]);
+  });
+
+  test("case_11", () => {
+    const recipients: Recipient[] = [
+      { percentage: 1 },
+      { numShares: 10 },
+      { numShares: 20 },
+      { numShares: 30 },
+      { percentage: 1 },
+      { numShares: 40 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([5, 49, 98, 147, 5, 196]);
+  });
+
+  test("case_12", () => {
+    const recipients: Recipient[] = [{ percentage: 100 }];
+    expect(feeRecipientsToSplits(recipients)).toEqual([1]);
+  });
+
+  test("case_13", () => {
+    const recipients: Recipient[] = [{ percentage: 1 }];
+    expect(feeRecipientsToSplits(recipients)).toEqual([1]);
+  });
+
+  test("case_14", () => {
+    const recipients: Recipient[] = [{ percentage: 101 }];
+    expect(feeRecipientsToSplits(recipients)).toBe(
+      RecipientsToSplitsError.TotalFeeExceeds100,
+    );
+  });
+
+  test("case_15", () => {
+    const recipients: Recipient[] = [{ percentage: 100 }, { numShares: 1 }];
+    expect(feeRecipientsToSplits(recipients)).toBe(
+      RecipientsToSplitsError.FeeIs100ButNonFeeRecipientsExist,
+    );
+  });
+
+  test("case_16", () => {
+    const recipients: Recipient[] = [
+      { numShares: 50 },
+      { numShares: 40 },
+      { numShares: 3 },
+      { numShares: 2 },
+      { numShares: 2 },
+      { numShares: 1 },
+      { percentage: 2 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([50, 40, 3, 2, 2, 1, 2]);
+  });
+
+  test("case_17", () => {
+    const recipients: Recipient[] = [{ numShares: 99999 }, { numShares: 1 }];
+    expect(feeRecipientsToSplits(recipients)).toEqual([99999, 1]);
+  });
+
+  test("case_18", () => {
+    const recipients: Recipient[] = [{ numShares: 0 }, { percentage: 0 }];
+    expect(feeRecipientsToSplits(recipients)).toEqual([0, 0]);
+  });
+
+  test("case_19", () => {
+    const recipients: Recipient[] = [
+      { numShares: Number.MAX_SAFE_INTEGER },
+      { numShares: Number.MAX_SAFE_INTEGER },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([1, 1]);
+  });
+
+  test("case_20", () => {
+    const recipients: Recipient[] = [
+      { numShares: Number.MAX_SAFE_INTEGER },
+      { numShares: 1 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([
+      Number.MAX_SAFE_INTEGER,
+      1,
+    ]);
+  });
+
+  test("case_21", () => {
+    const recipients: Recipient[] = [
+      { numShares: Number.MAX_SAFE_INTEGER },
+      { percentage: 1 },
+    ];
+    expect(feeRecipientsToSplits(recipients)).toEqual([99, 1]);
   });
 });
