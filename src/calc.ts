@@ -6,29 +6,30 @@
  *
  * If there aren't enough sats, the function will prioritize recipients with higher splits.
  *
+ * If no recipients have 0 split and the total number of sats is a multiple of the sum of splits,
+ * it distributes sats proportionally.
+ *
  * @param splits - An array of numbers representing the splits for each recipient
  * @param totalSats - The total number of satoshis to distribute
  * @returns An array of numbers representing the number of satoshis for each recipient
  *
  * @example
- * // Example 1
- * const splits1 = [60, 40];
- * const totalSats1 = 1000;
- * console.log(computeSatRecipients(splits1, totalSats1)); // [600, 400]
+ * // Example 1: Proportional distribution
+ * const splits1 = [50, 40, 3, 2, 2, 1, 2];
+ * const totalSats1 = 100;
+ * console.log(computeSatRecipients(splits1, totalSats1)); // [50, 40, 3, 2, 2, 1, 2]
  *
  * @example
- * // Example 2
- * const splits2 = [1, 99];
- * const totalSats2 = 10;
- * // It's ensured that the recipient with 1% split still gets at least 1 sat:
- * console.log(computeSatRecipients(splits2, totalSats2)); // [1, 9]
+ * // Example 2: Regular distribution
+ * const splits2 = [60, 40];
+ * const totalSats2 = 1000;
+ * console.log(computeSatRecipients(splits2, totalSats2)); // [600, 400]
  *
  * @example
- * // Example 3
+ * // Example 3: Ensuring minimum distribution
  * const splits3 = [1, 99];
- * const totalSats3 = 1;
- * // There is only 1 sat available to distribute, so the recipient with the larger split gets it:
- * console.log(computeSatRecipients(splits3, totalSats3)); // [0, 1]
+ * const totalSats3 = 10;
+ * console.log(computeSatRecipients(splits3, totalSats3)); // [1, 9]
  */
 export function computeSatRecipients(
   splits: number[],
@@ -39,6 +40,12 @@ export function computeSatRecipients(
 
   if (splits.length === 0) {
     return [];
+  }
+
+  // Check if all splits are non-zero and totalSats is a multiple of totalSplit
+  if (!splits.includes(0) && totalSats % totalSplit === 0) {
+    // Distribute sats proportionally
+    return splits.map((split) => Math.floor((split * totalSats) / totalSplit));
   }
 
   // Create an array of [index, split] pairs and sort it by split in descending order

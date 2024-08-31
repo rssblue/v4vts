@@ -177,4 +177,28 @@ describe("computeSatRecipients", () => {
     const totalSats = 0;
     expect(computeSatRecipients(splits, totalSats)).toEqual([0, 0]);
   });
+
+  test("case-26", () => {
+    const splits = [50, 40, 3, 2, 2, 1, 2];
+    const totalSats = 100;
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      50, 40, 3, 2, 2, 1, 2,
+    ]);
+  });
+
+  test("case-27", () => {
+    const splits = [50, 40, 3, 2, 2, 1, 2];
+    const totalSats = 1000;
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      500, 400, 30, 20, 20, 10, 20,
+    ]);
+  });
+
+  test("case-28", () => {
+    const splits = [50, 40, 3, 2, 2, 1, 2];
+    const totalSats = 10;
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      3, 2, 1, 1, 1, 1, 1,
+    ]);
+  });
 });
