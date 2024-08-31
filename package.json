@@ -1,8 +1,31 @@
 {
-  "main": "dist/index.js",
   "name": "v4vts",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "V4V calculations and transactions for Podcasting 2.0",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./calc": {
+      "import": "./dist/calc.js",
+      "require": "./dist/calc.js",
+      "types": "./dist/calc.d.ts"
+    },
+    "./forwarding": {
+      "import": "./dist/forwarding.js",
+      "require": "./dist/forwarding.js",
+      "types": "./dist/forwarding.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "keywords": [
     "rss",
     "podcasting20",
@@ -17,10 +40,6 @@
     "type": "git",
     "url": "git+https://github.com/rssblue/v4vts.git"
   },
-  "files": [
-    "dist"
-  ],
-  "type": "module",
   "license": "MIT",
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.15.4",
