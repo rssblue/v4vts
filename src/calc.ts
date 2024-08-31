@@ -35,56 +35,111 @@ export function computeSatRecipients(
   splits: number[],
   totalSats: number,
 ): number[] {
+  // Sanitize totalSats: convert to a non-negative integer
+  totalSats = Math.max(0, Math.floor(Number(totalSats) || 0));
+
+  // Sanitize splits: convert each to a non-negative integer
+  splits = splits.map((split) => Math.max(0, Math.floor(Number(split) || 0)));
+
   const numRecipients = splits.length;
-  const totalSplit = splits.reduce((sum, split) => sum + split, 0);
 
-  if (splits.length === 0) {
-    return [];
+  if (splits.length === 0 || totalSats === 0) {
+    return new Array(numRecipients).fill(0);
   }
 
-  // Check if all splits are non-zero and totalSats is a multiple of totalSplit
-  if (!splits.includes(0) && totalSats % totalSplit === 0) {
-    // Distribute sats proportionally
-    return splits.map((split) => Math.floor((split * totalSats) / totalSplit));
-  }
+  // Use BigInt for calculations to avoid overflow
+  const totalSplitBigInt = splits.reduce(
+    (sum, split) => sum + BigInt(split),
+    0n,
+  );
 
-  // Create an array of [index, split] pairs and sort it by split in descending order
-  const indexedSplits: [number, number][] = splits
-    .map((split, index) => [index, split] as [number, number])
-    .sort((a, b) => b[1] - a[1]);
-
-  const satAmounts: number[] = new Array(numRecipients).fill(0);
-  let remainingSats = totalSats;
-
-  // First, give one sat to as many recipients as possible, prioritizing higher splits
-  for (const [index] of indexedSplits) {
-    if (remainingSats === 0) {
-      break;
+  if (totalSplitBigInt === 0n) {
+    // If all splits are zero, distribute evenly
+    const baseAmount = Math.floor(totalSats / numRecipients);
+    const remainder = totalSats % numRecipients;
+    const result = new Array(numRecipients).fill(baseAmount);
+    for (let i = 0; i < remainder; i++) {
+      result[i]++;
     }
-    satAmounts[index] = 1;
-    remainingSats--;
+    return result;
   }
 
-  if (remainingSats > 0) {
-    // Distribute remaining sats based on split ratios
-    if (totalSplit > 0) {
-      for (const [index, split] of indexedSplits) {
-        const share = Math.floor((split * remainingSats) / totalSplit);
-        (satAmounts[index] as number) += share;
+  // Distribute sats proportionally
+  let satAmounts = splits.map((split) =>
+    Number((BigInt(split) * BigInt(totalSats)) / totalSplitBigInt),
+  );
+
+  // Give one sat to everyone who doesn't have it
+  satAmounts = satAmounts.map((amount) => (amount === 0 ? 1 : amount));
+
+  let balance = totalSats - satAmounts.reduce((sum, amount) => sum + amount, 0);
+
+  // Create an array of [index, split] pairs
+  let indexedSplits = splits.map(
+    (split, index) => [index, split] as [number, number],
+  );
+
+  if (balance < 0) {
+    // Sort by increasing splits, then by decreasing index
+    indexedSplits.sort(([i1, s1], [i2, s2]) => (s1 !== s2 ? s1 - s2 : i2 - i1));
+
+    const initialBalance = balance;
+
+    // First iteration: Remove from those that have at least two sats
+    for (const [index, split] of indexedSplits) {
+      if (balance < 0 && (satAmounts[index] as number) > 1) {
+        // Remove amount proportional to the split
+        const amountToRemove = Math.max(
+          1,
+          Math.floor(
+            (split * Math.abs(initialBalance)) / Number(totalSplitBigInt),
+          ),
+        );
+        (satAmounts[index] as number) -= amountToRemove;
+        balance += amountToRemove;
+      }
+      if (balance === 0) break;
+    }
+
+    if (balance < 0) {
+      let indexedSplitsWithAmounts = indexedSplits.map(
+        ([index, split]) =>
+          [index, split, satAmounts[index]] as [number, number, number],
+      );
+
+      // Sort based on the complex criteria
+      indexedSplitsWithAmounts.sort(([i1, s1, a1], [i2, s2, a2]) => {
+        if (a1 >= 2 && a2 >= 2) return s1 - s2;
+        if (a1 >= 2) return -1;
+        if (a2 >= 2) return 1;
+        if (a1 >= 1 && a2 >= 1) return s1 - s2;
+        if (a1 >= 1) return -1;
+        if (a2 >= 1) return 1;
+        return i2 - i1;
+      });
+
+      // Update indexedSplits with the new order
+      indexedSplits = indexedSplitsWithAmounts.map(([i, s]) => [i, s]);
+
+      for (const [index] of indexedSplits) {
+        if (balance < 0 && (satAmounts[index] as number) > 0) {
+          (satAmounts[index] as number)--;
+          balance++;
+        }
+        if (balance === 0) break;
       }
     }
+  } else if (balance > 0) {
+    // Sort by decreasing splits for positive balance
+    indexedSplits.sort(([, a], [, b]) => b - a);
 
-    // Distribute any leftover sats to recipients with the highest splits
-    const distributedSats = satAmounts.reduce((sum, amount) => sum + amount, 0);
-    remainingSats = totalSats - distributedSats;
-
-    if (remainingSats > 0) {
-      for (const [index] of indexedSplits) {
-        if (remainingSats === 0) {
-          break;
-        }
+    // Single iteration: add sats to recipients
+    for (const [index] of indexedSplits) {
+      if (balance > 0) {
         (satAmounts[index] as number)++;
-        remainingSats--;
+        balance--;
+      } else {
+        break;
       }
     }
   }
