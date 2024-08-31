@@ -87,14 +87,14 @@ export function computeSatRecipients(
 
     // First iteration: Remove from those that have at least two sats
     for (const [index, split] of indexedSplits) {
-      if (balance < 0 && (satAmounts[index] as number) > 1) {
+      const amountToRemove = Math.max(
+        1,
+        Math.floor(
+          (split * Math.abs(initialBalance)) / Number(totalSplitBigInt),
+        ),
+      );
+      if (balance < 0 && (satAmounts[index] as number) > amountToRemove) {
         // Remove amount proportional to the split
-        const amountToRemove = Math.max(
-          1,
-          Math.floor(
-            (split * Math.abs(initialBalance)) / Number(totalSplitBigInt),
-          ),
-        );
         (satAmounts[index] as number) -= amountToRemove;
         balance += amountToRemove;
       }

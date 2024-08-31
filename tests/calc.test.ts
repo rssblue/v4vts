@@ -275,6 +275,14 @@ describe("computeSatRecipients", () => {
     const totalSats = NaN;
     expect(computeSatRecipients(splits, totalSats)).toEqual([0, 0]);
   });
+
+  test("case-39", () => {
+    const splits = [50, 40, 3, 2, 2, 1, 2];
+    const totalSats = 4;
+    expect(computeSatRecipients(splits, totalSats)).toEqual([
+      1, 1, 1, 1, 0, 0, 0,
+    ]);
+  });
 });
 
 describe("feeRecipientsToSplits", () => {
